@@ -10,10 +10,10 @@ import org.apfloat.ApfloatMath;
 
 public class FunctionLists {
 	private Map<String, Function> map;
-
-	public FunctionLists() {
+	private long precision;
+	public FunctionLists(long prec) {
+	    this.precision = prec;
 		map = new TreeMap<String, Function>(new Comparator<String>() {
-
 			@Override
 			public int compare(String o1, String o2) {
 				return o1.toLowerCase().compareTo(o2.toLowerCase());
@@ -22,11 +22,11 @@ public class FunctionLists {
 		});
 
 		addFunction("pi", 0, (List<Apfloat> params) -> {
-			return ApfloatMath.pi(50);
+			return ApfloatMath.pi(precision);
 		});
 
 		addFunction("e", 0, (List<Apfloat> params) -> {
-			return ApfloatMath.exp(new Apfloat(1, 50));
+			return ApfloatMath.exp(new Apfloat(1, precision));
 		});
 
 		addFunction("sin", 1, (List<Apfloat> params) -> {
@@ -94,7 +94,7 @@ public class FunctionLists {
 		});
 
 		addFunction("inv", 1, (List<Apfloat> params) -> {
-			return new Apfloat(1, 50).divide(params.get(0));
+			return new Apfloat(1, precision).divide(params.get(0));
 		});
 
 		addFunction("abs", 1, (List<Apfloat> params) -> {
@@ -106,15 +106,20 @@ public class FunctionLists {
 		});
 
 		addFunction("fac", 1, (List<Apfloat> params) -> {
-			return fac(params.get(0));
+			return fac(params.get(0), precision);
 		});
 	}
+	
+	public FunctionLists()
+    {
+        this(50);
+    }
 
-	private Apfloat fac(Apfloat apfloat) {
+	private Apfloat fac(Apfloat apfloat, long precision) {
 		if (apfloat.compareTo(Apfloat.ONE) <= 0) {
 			return new Apfloat(1);
 		} else {
-			return apfloat.multiply(fac(apfloat.subtract(new Apfloat(1, 50))));
+			return apfloat.multiply(fac(apfloat.subtract(new Apfloat(1, precision)), precision));
 		}
 	}
 
@@ -125,5 +130,21 @@ public class FunctionLists {
 	public void addFunction(String name, int numParams, FuncInterface cmd) {
 		map.put(name, new Function(name, numParams, cmd));
 	}
+
+    /**
+     * @return the precision
+     */
+    public long getPrecision()
+    {
+        return precision;
+    }
+
+    /**
+     * @param precision the precision to set
+     */
+    public void setPrecision(long precision)
+    {
+        this.precision = precision;
+    }
 
 }

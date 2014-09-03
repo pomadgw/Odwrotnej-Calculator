@@ -16,13 +16,15 @@ public class RPNCalculator {
 	private Stack<Apfloat> stack;
 	private Map<String, Operator> mapOp;
 	private Map<String, Function> mapFunc;
+	private FunctionLists funcList;
 
 	private boolean isRPN = true;
+	private long precision;
 
 	public static void main(String[] args) {
-		RPNCalculator npt = new RPNCalculator();
 		Scanner in = new Scanner(System.in);
 		String str;
+        RPNCalculator npt = new RPNCalculator();
 
 		System.out
 				.println("Selamat datang di Kalkulator dengan\nNotasi Polandia Terbalik!");
@@ -36,7 +38,19 @@ public class RPNCalculator {
 			if (str.equalsIgnoreCase("changes mode")) {
 				npt.setIsRPN(!npt.isRPN());
 				System.out.println("in mode RPN: " + npt.isRPN());
-			} else if (str.equalsIgnoreCase("about")) {
+			} else if (str.length() >= 4 && str.substring(0, 4).equalsIgnoreCase("prec")) {
+			    StringTokenizer strTok = new StringTokenizer(str);
+			    strTok.nextToken(); // ignore "prec"
+			    
+			    if (strTok.hasMoreTokens()) {
+			        String newPrecision = strTok.nextToken();
+			        npt.setPrecision(Long.parseLong(newPrecision));
+			    } else {
+			        npt.setPrecision(50);
+			    }
+			    
+			}
+			else if (str.equalsIgnoreCase("about")) {
 				System.out.println("RPC version 1.0.0\nby Rahadian Yusuf");
 			} else if (str.equalsIgnoreCase("help")) {
 				System.out.println("Operators: ");
@@ -80,19 +94,25 @@ public class RPNCalculator {
 		}
 	}
 
-	public RPNCalculator() {
+	public RPNCalculator(long precision) {
 		stack = new Stack<Apfloat>();
 		mapOp = new OperatorLists().getOperators();
-		mapFunc = new FunctionLists().getFunctions();
-		;
+		funcList = new FunctionLists(precision);
+		mapFunc = funcList.getFunctions();
+		this.precision = precision;
 	}
 
-	public boolean parseInfix(String syntax) {
+	public RPNCalculator()
+    {
+	    this(50);
+    }
+
+    public boolean parseInfix(String syntax) {
 		return parseRPN(toRPN(syntax));
 	}
 
 	public boolean parseRPN(String syntax) {
-		Apfloat ret = new Apfloat("0");
+		Apfloat ret = new Apfloat(0, precision);
 
 		boolean error = false;
 		StringTokenizer sc = new StringTokenizer(syntax);
@@ -105,7 +125,7 @@ public class RPNCalculator {
 				// Angka itu harus dibebaskan dari String dan dimasukkan ke
 				// dalam rumah Stack
 
-				Apfloat x = new Apfloat(in, 50);
+				Apfloat x = new Apfloat(in, precision);
 				stack.push(x);
 			} catch (NumberFormatException e) {
 				// Wah, ternyata bukan angka. Mungkin operator yang ingin
@@ -274,4 +294,20 @@ public class RPNCalculator {
 	public final Map<String, Function> getFunctions() {
 		return mapFunc;
 	}
+
+    /**
+     * @return the precision
+     */
+    public long getPrecision()
+    {
+        return precision;
+    }
+
+    /**
+     * @param precision the precision to set
+     */
+    public void setPrecision(long precision)
+    {
+        this.precision = precision;
+    }
 }
